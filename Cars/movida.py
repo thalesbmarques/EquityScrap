@@ -260,7 +260,7 @@ def set_up_threads(params):
 if __name__ == '__main__':
     df_list = set_up_threads(params_)
     df = pd.concat(df_list)
-    # Conneting to sql
+    # Connecting to sql
     conn = sqlite3.connect('db/data.db3')
     # Exporting to sql
     df.to_sql('movida', con=conn, if_exists='append', index=False)
