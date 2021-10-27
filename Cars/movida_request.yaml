@@ -1,5 +1,5 @@
 # YAML Input file for webscraping Movida website
-# Edit this file paremeters to run your scrap
+# Edit this file parameters to run your scrap
 
 start_dt:
   - "01/11/2021"
