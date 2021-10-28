@@ -1,0 +1,18 @@
+# YAML Script to scrap large combinations of dates, places and times on Movida
+
+date_range: 10
+
+date_interval:
+  start_intervals:
+    - 1
+  end_intervals:
+    - 10
+    - 15
+    - 20
+
+time:
+  - "08:00"
+
+places:
+  - "CGH"
+  - "GRU"

@@ -3,13 +3,16 @@ import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from bs4 import BeautifulSoup
-from datetime import datetime
+from datetime import datetime, timedelta
 import numpy as np
 from concurrent.futures import ThreadPoolExecutor
 import os
 import logging
 import sqlite3
 import yaml
+import itertools
+import sys
+from timeit import default_timer as timer
 
 # Adjusting CWD (Just for testing)
 os.chdir('/Users/thalesmarques/PycharmProjects/EquityScrap')
@@ -20,15 +23,73 @@ logging.basicConfig(level=logging.DEBUG, filename='data.log', filemode='a',
 logging.getLogger("selenium").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
+stdout_handler = logging.StreamHandler(sys.stdout)
+logger.addHandler(stdout_handler)
 
 # Todo: Warn if something is missing (probably on clean_movida_html)
 # Todo: Retry if something is missing (how?)
 
-# Inputs
-with open('Cars/movida_request.yaml') as file:
-    # The FullLoader parameter handles the conversion from YAML
-    # scalar values to Python the dictionary format
-    params_ = yaml.load(file, Loader=yaml.FullLoader)
+start = timer()
+
+def get_params():
+    """
+    Get manual parameters from movida_requests
+    Returns
+    -------
+    dict
+        params
+    """
+    # Inputs
+    with open('Cars/movida_request.yaml') as file:
+        # The FullLoader parameter handles the conversion from YAML
+        # scalar values to Python the dictionary format
+        params = yaml.load(file, Loader=yaml.FullLoader)
+
+    return params
+
+
+def get_mass_params():
+    """
+    Read movida_mass_requests.yaml and process the inputs for the function
+    Returns
+    -------
+    dictionary
+        params
+    """
+    # Opening yaml file
+    with open('Cars/movida_mass_request.yaml') as file:
+        # The FullLoader parameter handles the conversion from YAML
+        # scalar values to Python the dictionary format
+        params_mass = yaml.load(file, Loader=yaml.FullLoader)
+
+    # Creating all combinations possible
+    today = datetime.today().date()
+    date_range = params_mass['date_range']
+    params_mass['dates'] = []
+    params_mass['end_date'] = []
+    params_mass['start_time'] = []
+
+    # Getting Combinations of start_date
+    for dt in params_mass['date_interval']['start_intervals']:
+        for i in range(dt, date_range + dt):
+            for dt_end in params_mass['date_interval']['end_intervals']:
+                params_mass['dates'].append((today + timedelta(days=i), today + timedelta(days=i + dt_end)))
+
+    # Removing duplicates
+    params_mass['dates'] = list(set(params_mass['dates']))
+
+    # Creating all possible combinations
+    params_comb = list(itertools.product(params_mass['dates'], params_mass['time'], params_mass['places']))
+
+    # Creating output params
+    params = dict()
+    params['start_dt'] = [x[0][0].strftime('%d/%m/%Y') for x in params_comb]
+    params['end_dt'] = [x[0][1].strftime('%d/%m/%Y') for x in params_comb]
+    params['start_time'] = [x[1] for x in params_comb]
+    params['end_time'] = [x[1] for x in params_comb]
+    params['place'] = [x[2] for x in params_comb]
+
+    return params
 
 
 def _scrap_movida(start_dt, end_dt, start_time, end_time, place):
@@ -177,6 +238,7 @@ def _clean_movida_html(html):
 
     # Formatting data
     prices = list(map(lambda s: s.strip(), prices))
+    prices = list(map(lambda s: s.replace('.', ''), prices))
     prices = list(map(lambda s: s.replace(',', '.'), prices))
     prices = list(map(lambda s: float(s), prices))
 
@@ -249,7 +311,7 @@ def set_up_threads(params):
                                params['start_time'],
                                params['end_time'],
                                params['place'],
-                               timeout=120)
+                               timeout=None)
         finals = []
         for value in results:
             finals.append(value)
@@ -258,6 +320,7 @@ def set_up_threads(params):
 
 
 if __name__ == '__main__':
+    params_ = get_mass_params()
     df_list = set_up_threads(params_)
     df = pd.concat(df_list)
     # Connecting to sql
@@ -266,3 +329,5 @@ if __name__ == '__main__':
     df.to_sql('movida', con=conn, if_exists='append', index=False)
     # Closing connection
     conn.close()
+    end = timer()
+    print(timedelta(seconds=end - start))
