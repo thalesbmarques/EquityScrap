@@ -25,7 +25,7 @@ to [movida_mass_request.yaml](Cars/movida_mass_request.yaml) and replace the val
 * start_intervals (int): n-days from now to start the scrap
 * end_intervals (int): n-days from start_intervals
 * time (str):
-* places (str): Movida Stores'codes. This will be available soon
+* places (str): Movida Stores'codes.  Codes are available in [json](db/movida_stores.json') or [csv](db/movida_stores.csv)
 
 Let's try an example:
 
