@@ -15,7 +15,8 @@ import sys
 from timeit import default_timer as timer
 
 # Adjusting CWD (Just for testing)
-os.chdir('/Users/thalesmarques/PycharmProjects/EquityScrap')
+# os.chdir('/Users/thalesmarques/PycharmProjects/EquityScrap')
+os.chdir('..')
 
 # Log Config
 logging.basicConfig(level=logging.DEBUG, filename='data.log', filemode='a',
