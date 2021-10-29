@@ -1,3 +1,9 @@
+# Author: Thales Batiston Marques
+# Contact: thalesbmarques@gmail.com
+# Github: https://github.com/thalesbmarques/
+# Linkedin: https://www.linkedin.com/in/thales-marques-240176114/
+# Medium: https://medium.com/@thalesbmarques
+
 import time
 import pandas as pd
 from selenium import webdriver
@@ -31,6 +37,7 @@ logger.addHandler(stdout_handler)
 # Todo: Retry if something is missing (how?)
 
 start = timer()
+
 
 def get_params():
     """
