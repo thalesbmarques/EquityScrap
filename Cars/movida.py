@@ -34,7 +34,6 @@ stdout_handler = logging.StreamHandler(sys.stdout)
 logger.addHandler(stdout_handler)
 
 # Todo: Warn if something is missing (probably on clean_movida_html)
-# Todo: Retry if something is missing (how?)
 
 start = timer()
 
@@ -198,12 +197,21 @@ def _scrap_movida(start_dt, end_dt, start_time, end_time, place):
     # Storing HTML
     time.sleep(15)
     html = BeautifulSoup(driver.page_source, features="html.parser")
+    while html.findAll("div", {"class": "block-car"}) is False:
+        logger.warning("[PAGE NOT LOADED] Place:%s, Start:%s - %s, End:%s - %s, " % (
+            place, start_dt, start_time, end_dt, end_time))
+        if not html.findAll("div", {"class": "block-car"}):
+            time.sleep(3)
+            html = BeautifulSoup(driver.page_source, features="html.parser")
 
-    logger.info(
-        "[DRIVER CLOSED] Place:%s, Start:%s - %s, End:%s - %s, " % (place, start_dt, start_time, end_dt, end_time))
+    logger.info("[PAGE LOADED] Place:%s, Start:%s - %s, End:%s - %s, " % (
+        place, start_dt, start_time, end_dt, end_time))
 
     # Getting Data
     driver.close()
+
+    logger.info(
+        "[DRIVER CLOSED] Place:%s, Start:%s - %s, End:%s - %s, " % (place, start_dt, start_time, end_dt, end_time))
 
     logger.info(
         "[SCRAP PASSED] Place:%s, Start:%s - %s, End:%s - %s, " % (place, start_dt, start_time, end_dt, end_time))
