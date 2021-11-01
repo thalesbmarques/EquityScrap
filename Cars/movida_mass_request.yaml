@@ -6,6 +6,7 @@ date_interval:
   start_intervals:
     - 1
   end_intervals:
+    - 5
     - 10
     - 15
     - 20
