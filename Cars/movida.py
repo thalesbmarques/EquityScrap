@@ -129,7 +129,11 @@ def _scrap_movida(start_dt, end_dt, start_time, end_time, place):
     options.add_argument("--disable-extensions")
     options.add_experimental_option('useAutomationExtension', False)
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    # options.add_argument("--headless")  # not working
+    options.add_argument("--headless")  # not working
+    options.add_argument(
+        "user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 12_0_1) AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/95.0.4638.69 Safari/537.36")
+    options.add_argument("window-size=1920,1080")
     driver = webdriver.Chrome(service=service, options=options)
     # driver = webdriver.Safari()  # only for tests
 
